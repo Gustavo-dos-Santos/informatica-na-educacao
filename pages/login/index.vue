@@ -24,13 +24,17 @@
 </template>
 
 <script lang="ts" setup>
+import { useUsuarioStore } from '~/stores/usuario';
+
 const state = ref({
   email: "",
   password: "",
 })
 
+const error = ref("");
+
 const submit = async () => {
-  const url = 'http://localhost:8080/login'
+  const url = 'http://localhost:8080/users/login'
   const params = { email: state.value.email, password: state.value.password }
   // navigateTo("/home");
 
@@ -44,11 +48,13 @@ const submit = async () => {
     });
 
     if (!response.ok) {
-      throw new Error(`Erro: ${response.status}`);
+      console.log(response)
     }
 
     const userData = await response.json();
     console.log('Dados do usuário:', userData);
+    useUsuarioStore().setUser(userData);
+    navigateTo("/home");
   } catch (error) {
     console.error('Erro na requisição GET:', error);
   }
