@@ -121,6 +121,11 @@
           </div>
         </template>
         <div style="width: 100%;">
+          <div>
+            <div v-if="dangerCreate" style="background-color: red ;  padding: 10px; margin-bottom: 10px ;">{{
+              dangerCreate
+              }}</div>
+          </div>
           <UFormGroup label="Nome:" style="margin-bottom: 20px;">
             <UInput v-model="wordSearch.name"></UInput>
           </UFormGroup>
@@ -131,9 +136,15 @@
             </div>
           </UFormGroup>
 
+          <div style="height: 400px;">
 
-          <div v-for="(item, index) in wordSearch.words" :key="index">
-            <span>{{ item }} <UButton icon="i-heroicons-x-mark" color="red"></UButton></span>
+            <div v-for="(item, index) in wordSearch.words" :key="index"
+              style="display: flex; align-items: center; margin-top: 50px;">
+              <span>{{ index + 1 }} - {{ item }} <UButton icon="i-heroicons-x-mark" color="red"
+                  @click="removeList(index)">
+                </UButton></span>
+            </div>
+
           </div>
           <!-- private String name;
           private List<String> words;
@@ -175,6 +186,7 @@ const idJogo = ref("");
 const jogando = ref(false);
 const danger = ref("");
 const sucesso = ref("")
+const dangerCreate = ref("")
 
 const wordSearch = ref({
   name: "",
@@ -183,20 +195,30 @@ const wordSearch = ref({
 })
 
 
+const removeList = (index: number) => {
+
+  wordSearch.value.words.splice(index, 1);
+
+}
+
 const addWord = () => {
-  if (wordCreate.value.length == 10) {
+  if (wordCreate.value.length >= 8) {
+    dangerCreate.value = "A palavra deve ter menos de 8 letras"
     return
   }
   const word = wordCreate.value.replace(/[^a-z]/g, '');
   if (word != wordCreate.value) {
+    dangerCreate.value = "A palavra so pode conter letras"
     return
   }
   if (wordSearch.value.words.length == 5) {
+    dangerCreate.value = "Apenas 5 palavras"
     return
   }
 
   wordSearch.value.words.push(wordCreate.value);
   wordCreate.value = ""
+  dangerCreate.value = ""
 }
 
 const openCrudCaca = () => {
@@ -255,7 +277,8 @@ async function deleteJogo(params: string) {
 
 async function createJogo() {
   if (wordSearch.value.name == "" || wordSearch.value.words.length != 5) {
-    return;
+    dangerCreate.value = "Deve haver um nome para o jogo e 5 palavras"
+    return
   }
   const url = 'http://localhost:8080/wordsearches'
 
@@ -277,6 +300,8 @@ async function createJogo() {
     }
 
     createCaca.value = false;
+    wordSearch.value.words = [];
+    wordSearch.value.name = "";
 
   } catch (error) {
     console.error('Erro na criação do jogo:', error);
